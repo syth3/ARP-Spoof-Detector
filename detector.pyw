@@ -125,7 +125,7 @@ def find_arp_poisining(arp_entry, ignore_these_macs):
                 mac_to_ip_dict[split_line[1]] = [split_line[0]]
     for mac in mac_to_ip_dict:
         if len(mac_to_ip_dict[mac]) > 1 and mac not in ignore_these_macs:
-            status = open_window("The following IPs have the same MAC: " + ', '.join(mac_to_ip_dict[mac]), "ARP Poisoning Detected")
+            status = open_window("The following MAC has more than one IP addresses linked to it\n {} -> {}".format(mac, ', '.join(mac_to_ip_dict[mac])), "Possible ARP Poisoning Detected")
             poisoned_macs.append((status, mac))
     return poisoned_macs
 

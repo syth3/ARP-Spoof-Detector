@@ -39,8 +39,6 @@ def open_window(text, title):
 
 
 def find_arp_poisining(arp_entry):
-    attacker_ips = []
-    attacker_macs = []
     mac_to_ip_dict = {}
     for i in range(1, len(arp_entry)):
         line = arp_entry[i].strip()

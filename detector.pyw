@@ -139,12 +139,21 @@ def main():
     """
     # 1) Collect input and display help message if needed
     if len(sys.argv) < 2:
-        print("Usage: detector.pyw adapter_description [sleep_time_seconds]")
+        print("Usage: python detector.pyw adapter_description [sleep_time_seconds]")
         print("For more help: dector.pyw -h or detector.pyw --help")
         exit(1)
     if "-h" in sys.argv or "--help" in sys.argv:
-        print("This program detects ARP poisoning by checking for duplicate MAC addresses in the ARP table for dynamic entries.")
-        print("For the first argument to this script, run ipconfig /all, find your adapter of choice, and copy and paste the description for that adapter")
+        print("Usage: python detector.pyw adapter_description [sleep_time_seconds]")
+        print("Summary:")
+        print("\tThis program detects ARP poisoning by checking for dynamic entries in the ARP table for duplicates.")
+        print("\tIt is only designed to work in a Windows environment. Use pythonw instead of python to run it in the background.")
+        print("First Argument:")
+        print("\tTo get the adapter description, do the following in a Windows environment:")
+        print("\t\t1) Run ipconfig /all")
+        print("\t\t2) Find your adapter of choice")
+        print("\t\t3) Copy text after \"Description . . . . . . . . . . . :\"")
+        print("Second Argument:")
+        print("\tAmount of seconds for program to sleep between checking for ARP poisoning.")
         exit(0)
     SLEEPY_TIME = 5
     if len(sys.argv) == 3:

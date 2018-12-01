@@ -89,9 +89,9 @@ def open_window(text, title):
         status of button pressed on the popup window
     
     """
-    instruction_string = "Abort -> terminate program entirely\n" \
-                     "Retry -> keep checking for ARP poisoning corresponding to the above MAC\n" \
-                     "Ignore -> stop checking for ARP poisonig corresponsing to the above MAC"
+    instruction_string = "Abort -> Terminate program entirely\n" \
+                     "Retry -> Keep checking for ARP poisoning corresponding to the above MAC\n" \
+                     "Ignore -> Stop checking for ARP poisonig corresponsing to the above MAC"
     return ctypes.windll.user32.MessageBoxW(0, text + "\n\nWhich button do I press?\n" + instruction_string, title, 2)
 
 
@@ -161,7 +161,6 @@ def main():
 
     # 3) Check for arp poisoning in a continous loop
     while(True):
-        print("Checking for ARP Poisoning")
         arp_table = (subprocess.check_output(("arp", "-a"), creationflags=CREATE_NO_WINDOW).decode("utf-8")).split("\n")
         starting_line, ending_line = get_range(arp_table, interface_ip)
         statuses = find_arp_poisining(arp_table[starting_line: ending_line+1], ignore_these_macs)

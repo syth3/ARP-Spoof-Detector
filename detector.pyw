@@ -88,7 +88,7 @@ def open_window(text, title):
     instruction_string = "Abort -> kill program entirely\n" \
                      "Retry -> keep checking for ARP poisoning corresponding to the above MAC\n" \
                      "Ignore -> stop checking for ARP poisonig corresponsing to the above MAC"
-    return ctypes.windll.user32.MessageBoxW(0, "Text" + "\n\nWhich button do I press?\n" + instruction_string, "Title", 2)
+    return ctypes.windll.user32.MessageBoxW(0, text + "\n\nWhich button do I press?\n" + instruction_string, title, 2)
 
 
 def find_arp_poisining(arp_entry, ignore_these_macs):

@@ -41,7 +41,6 @@ def find_arp_poisining(arp_entry):
     attacker_ips = []
     attacker_macs = []
     mac_to_ip_dict = {}
-    for line in arp_entry:
     for i in range(1, len(arp_entry)):
         line = arp_entry[i].strip()
         split_line = line.split()

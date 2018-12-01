@@ -148,7 +148,7 @@ def main():
         exit(0)
     SLEEPY_TIME = 5
     if len(sys.argv) == 3:
-        SLEEPY_TIME = sys.argv[3]
+        SLEEPY_TIME = int(sys.argv[2])
     interface_description = sys.argv[1]
 
     # 2) Get IP associated with interface given
@@ -158,9 +158,10 @@ def main():
         exit(1)
     CREATE_NO_WINDOW = 0x08000000
     ignore_these_macs = []
-    
+
     # 3) Check for arp poisoning in a continous loop
     while(True):
+        print("Checking for ARP Poisoning")
         arp_table = (subprocess.check_output(("arp", "-a"), creationflags=CREATE_NO_WINDOW).decode("utf-8")).split("\n")
         starting_line, ending_line = get_range(arp_table, interface_ip)
         statuses = find_arp_poisining(arp_table[starting_line: ending_line+1], ignore_these_macs)

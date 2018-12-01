@@ -1,6 +1,7 @@
 import ctypes
 import sys
 import subprocess
+import time
 
 import wmi
 
@@ -57,9 +58,11 @@ def find_arp_poisining(arp_entry):
 def main():
     interface_description = sys.argv[1]
     interface_ip = get_interface_ip(interface_description)
-    arp_table = (subprocess.check_output(("arp", "-a")).decode("utf-8")).split("\n")
-    starting_line, ending_line = get_range(arp_table, interface_ip)
-    find_arp_poisining(arp_table[starting_line: ending_line+1])
+    while(True):
+        arp_table = (subprocess.check_output(("arp", "-a")).decode("utf-8")).split("\n")
+        starting_line, ending_line = get_range(arp_table, interface_ip)
+        find_arp_poisining(arp_table[starting_line: ending_line+1])
+        time.sleep(5)
 
         
     

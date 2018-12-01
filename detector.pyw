@@ -1,7 +1,7 @@
 '''
 file: detector.pyw
 language: python3
-author: Jacob Brown jmb7438@rit.edu
+author: Jacob Brown
 description: Detect ARP Poisoning by looking for the same MAC address tied to different IP addressed
  in the arp table. This program is meant to be run on Windows.
 '''

@@ -42,17 +42,14 @@ def find_arp_poisining(arp_entry):
     attacker_macs = []
     mac_to_ip_dict = {}
     for line in arp_entry:
-        print(line)
     for i in range(1, len(arp_entry)):
         line = arp_entry[i].strip()
         split_line = line.split()
-        print(split_line)
         if split_line[2] == "dynamic":
             if split_line[1] in mac_to_ip_dict:
                 mac_to_ip_dict[split_line[1]].append(split_line[0])
             else:
                 mac_to_ip_dict[split_line[1]] = [split_line[0]]
-    print(mac_to_ip_dict)
     for key in mac_to_ip_dict:
         if len(mac_to_ip_dict[key]) > 1:
             open_window("The following IPs have the same MAC: " + ', '.join(mac_to_ip_dict[key]), "ARP Poisoning Detected")

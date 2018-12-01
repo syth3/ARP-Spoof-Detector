@@ -89,7 +89,7 @@ def open_window(text, title):
         status of button pressed on the popup window
     
     """
-    instruction_string = "Abort -> kill program entirely\n" \
+    instruction_string = "Abort -> terminate program entirely\n" \
                      "Retry -> keep checking for ARP poisoning corresponding to the above MAC\n" \
                      "Ignore -> stop checking for ARP poisonig corresponsing to the above MAC"
     return ctypes.windll.user32.MessageBoxW(0, text + "\n\nWhich button do I press?\n" + instruction_string, title, 2)
@@ -125,7 +125,7 @@ def find_arp_poisining(arp_entry, ignore_these_macs):
                 mac_to_ip_dict[split_line[1]] = [split_line[0]]
     for mac in mac_to_ip_dict:
         if len(mac_to_ip_dict[mac]) > 1 and mac not in ignore_these_macs:
-            status = open_window("The following MAC has more than one IP addresses linked to it\n {} -> {}".format(mac, ', '.join(mac_to_ip_dict[mac])), "Possible ARP Poisoning Detected")
+            status = open_window("The following MAC address has more than one IP addresses linked to it\n {} -> {}".format(mac, ', '.join(mac_to_ip_dict[mac])), "Possible ARP Poisoning Detected")
             poisoned_macs.append((status, mac))
     return poisoned_macs
 
@@ -137,22 +137,29 @@ def main():
     3) Check for arp poisoning in a continous loop 
     
     """
-
-    if len(sys.argv) != 2:
-        print("Usage: detector.pyw \"<adapter_description>\"")
+    # 1) Collect input and display help message if needed
+    if len(sys.argv) < 2:
+        print("Usage: detector.pyw adapter_description [sleep_time_seconds]")
         print("For more help: dector.pyw -h or detector.pyw --help")
         exit(1)
     if "-h" in sys.argv or "--help" in sys.argv:
         print("This program detects ARP poisoning by checking for duplicate MAC addresses in the ARP table for dynamic entries.")
         print("For the first argument to this script, run ipconfig /all, find your adapter of choice, and copy and paste the description for that adapter")
         exit(0)
+    SLEEPY_TIME = 5
+    if len(sys.argv) == 3:
+        SLEEPY_TIME = sys.argv[3]
     interface_description = sys.argv[1]
+
+    # 2) Get IP associated with interface given
     interface_ip = get_interface_ip(interface_description)
     if len(interface_ip) < 7:
         print("Could not find an IP address for the following interface: {}".format(interface_description))
         exit(1)
     CREATE_NO_WINDOW = 0x08000000
     ignore_these_macs = []
+    
+    # 3) Check for arp poisoning in a continous loop
     while(True):
         arp_table = (subprocess.check_output(("arp", "-a"), creationflags=CREATE_NO_WINDOW).decode("utf-8")).split("\n")
         starting_line, ending_line = get_range(arp_table, interface_ip)
@@ -167,7 +174,7 @@ def main():
             # Ignore
             if status[0] == 5:
                 ignore_these_macs.append(status[1])
-        time.sleep(5)
+        time.sleep(SLEEPY_TIME)
 
         
     

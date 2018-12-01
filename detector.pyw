@@ -1,3 +1,11 @@
+'''
+file: detector.pyw
+language: python3
+author: Jacob Brown jmb7438@rit.edu
+description: Detect ARP Poisoning by looking for the same MAC address tied to different IP addressed
+ in the arp table. This program is meant to be run on Windows.
+'''
+
 import ctypes
 import sys
 import subprocess
@@ -6,7 +14,23 @@ import time
 import wmi
 
 
-def get_interface_ip(target_interface, all=False):
+def get_interface_ip(target_interface):
+    """
+    Return IP address given the interface description. The interface description
+    can be found by using the "ipconfig /all" command and looking for the "Description" row
+    under the desired adapter.
+    
+    Parameters
+    ----------
+    target_interface : string
+        interface_description to get the IP of
+    
+    Returns
+    -------
+    string
+        IP address of the specified target_inteface
+    """
+
     c = wmi.WMI ()
     ipaddress = ""
     for interface in c.Win32_NetworkAdapterConfiguration (IPEnabled=1):
@@ -16,6 +40,21 @@ def get_interface_ip(target_interface, all=False):
 
 
 def get_range(arp_table, interface_ip):
+    """
+    Given the output of "arp -a", find the arp entries that correspond to the specified IP address
+    
+    Parameters
+    ----------
+    arp_table : list
+        "arp -a" output
+    interface_ip : string
+        IP to find the arp entries of
+    
+    Returns
+    -------
+    int, int
+        return the starting index in the arp table, and ending index corresponding to the desired section
+    """
     count = 0
     starting_line = 0
     ending_line = 0
@@ -35,11 +74,40 @@ def get_range(arp_table, interface_ip):
 
 
 def open_window(text, title):
-    ctypes.windll.user32.MessageBoxW(0, text, title, 0)
+    """
+    Make a pop up window in Windows
+    
+    Parameters
+    ----------
+    text : string
+        text to be displayed in the window
+    title : string
+        title to be displayed in the window
+    
+    """
+    instruction_string = "Abort -> kill program entirely\n" \
+                     "Retry -> keep checking for ARP poisoning corresponding to the above MAC\n" \
+                     "Ignore -> stop checking for ARP poisonig corresponsing to the above MAC"
+    return ctypes.windll.user32.MessageBoxW(0, "Text" + "\n\nWhich button do I press?\n" + instruction_string, "Title", 2)
 
 
-def find_arp_poisining(arp_entry):
+def find_arp_poisining(arp_entry, ignore_these_macs):
+    """
+    Create a dictionary mapping MAC addresses to corresponding IP addresses.
+    If a MAC address has more than one IP address associated with it, alert the user 
+    with a popup window.
+    
+    Parameters
+    ----------
+    arp_entry : list
+        list of arp entries each specifying a IP address, MAC address, and type
+    ignore_these_macs : list
+        list of MAC addresses to ignore possible ARP poisoning on
+    
+    """
+    print("Ignore these MACs:", ignore_these_macs)
     mac_to_ip_dict = {}
+    poisoned_macs = []
     for i in range(1, len(arp_entry)):
         line = arp_entry[i].strip()
         split_line = line.split()
@@ -48,19 +116,50 @@ def find_arp_poisining(arp_entry):
                 mac_to_ip_dict[split_line[1]].append(split_line[0])
             else:
                 mac_to_ip_dict[split_line[1]] = [split_line[0]]
-    for key in mac_to_ip_dict:
-        if len(mac_to_ip_dict[key]) > 1:
-            open_window("The following IPs have the same MAC: " + ', '.join(mac_to_ip_dict[key]), "ARP Poisoning Detected")
+    for mac in mac_to_ip_dict:
+        if len(mac_to_ip_dict[mac]) > 1 and mac not in ignore_these_macs:
+            status = open_window("The following IPs have the same MAC: " + ', '.join(mac_to_ip_dict[mac]), "ARP Poisoning Detected")
+            poisoned_macs.append((status, mac))
+    return poisoned_macs
 
 
 def main():
+    """
+    1) Collect input and display help message if needed
+    2) Get IP associated with interface given
+    3) Infinitely loop 
+    
+    """
+
+    if len(sys.argv) != 2:
+        print("Usage: detector.pyw \"<adapter_description>\"")
+        print("For more help: dector.pyw -h or detector.pyw --help")
+        exit(1)
+    if "-h" in sys.argv or "--help" in sys.argv:
+        print("This program detects ARP poisoning by checking for duplicate MAC addresses in the ARP table for dynamic entries.")
+        print("For the first argument to this script, run ipconfig /all, find your adapter of choice, and copy and paste the description for that adapter")
+        exit(0)
     interface_description = sys.argv[1]
     interface_ip = get_interface_ip(interface_description)
+    if len(interface_ip) < 7:
+        print("Could not find an IP address for the following interface: {}".format(interface_description))
+        exit(1)
     CREATE_NO_WINDOW = 0x08000000
+    ignore_these_macs = []
     while(True):
         arp_table = (subprocess.check_output(("arp", "-a"), creationflags=CREATE_NO_WINDOW).decode("utf-8")).split("\n")
         starting_line, ending_line = get_range(arp_table, interface_ip)
-        find_arp_poisining(arp_table[starting_line: ending_line+1])
+        statuses = find_arp_poisining(arp_table[starting_line: ending_line+1], ignore_these_macs)
+        for status in statuses:
+            # Abort
+            if status[0] == 3:
+                exit(0)
+            # Retry
+            if status[0] == 4:
+                pass
+            # Ignore
+            if status[0] == 5:
+                ignore_these_macs.append(status[1])
         time.sleep(5)
 
         

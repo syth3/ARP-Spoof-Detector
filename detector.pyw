@@ -16,7 +16,7 @@ import wmi
 
 def get_interface_ip(target_interface):
     """
-    Return IP address given the interface description. The interface description
+    Return IP address of the given the interface description. The interface description
     can be found by using the "ipconfig /all" command and looking for the "Description" row
     under the desired adapter.
     
@@ -83,6 +83,10 @@ def open_window(text, title):
         text to be displayed in the window
     title : string
         title to be displayed in the window
+    Returns
+    -------
+    int
+        status of button pressed on the popup window
     
     """
     instruction_string = "Abort -> kill program entirely\n" \
@@ -103,9 +107,12 @@ def find_arp_poisining(arp_entry, ignore_these_macs):
         list of arp entries each specifying a IP address, MAC address, and type
     ignore_these_macs : list
         list of MAC addresses to ignore possible ARP poisoning on
+    Returns
+    -------
+    list of int, string tuples
+        list of status number, mac address tuples
     
     """
-    print("Ignore these MACs:", ignore_these_macs)
     mac_to_ip_dict = {}
     poisoned_macs = []
     for i in range(1, len(arp_entry)):
@@ -127,7 +134,7 @@ def main():
     """
     1) Collect input and display help message if needed
     2) Get IP associated with interface given
-    3) Infinitely loop 
+    3) Check for arp poisoning in a continous loop 
     
     """
 

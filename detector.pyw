@@ -64,10 +64,11 @@ def get_range(arp_table, interface_ip):
         if "Interface: " + interface_ip in line:
             starting_line = count+1
             current_interface = "Interface: " + interface_ip
-            # When you get to the next interface, aka the end of the desired one
+            # When you get to the next interface (the end of the desired one)
         if "Interface" in line and "Interface: " + interface_ip not in line and current_interface == "Interface: " + interface_ip:
             ending_line = count-2
         count += 1
+    # If there is only one interface, ending_line will never be touched
     if ending_line == 0:
         ending_line = count-2
     return starting_line, ending_line
@@ -86,12 +87,15 @@ def open_window(text, title):
     Returns
     -------
     int
-        status of button pressed on the popup window
+        Status of button pressed on the popup window.
+            3 if Abort is pressed,
+            4 if Retry is pressed,
+            5 is Ignore is pressed
     
     """
     instruction_string = "Abort -> Terminate program entirely\n" \
                      "Retry -> Keep checking for ARP poisoning corresponding to the above MAC\n" \
-                     "Ignore -> Stop checking for ARP poisonig corresponsing to the above MAC"
+                     "Ignore -> Stop checking for ARP poisoning corresponding to the above MAC"
     return ctypes.windll.user32.MessageBoxW(0, text + "\n\nWhich button do I press?\n" + instruction_string, title, 2)
 
 

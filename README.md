@@ -1,5 +1,5 @@
 # ARP-Spoof-Detector
-This Python program detects ARP spoofind by checking for duplicated in the ARp table.
+This Python program detects ARP spoofing by checking for duplicated in the ARp table.
 
 ## Installation
 ```
